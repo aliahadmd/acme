@@ -1,0 +1,13 @@
+{
+  "name": "@acme/api",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "uv run fastapi dev",
+    "build": "uv run python -m compileall -q app",
+    "test": "uv run pytest -q",
+    "lint": "uv run ruff check . && uv run ruff format --check .",
+    "typecheck": "uv run ty check .",
+    "schema": "uv run python scripts/export_openapi.py"
+  }
+}

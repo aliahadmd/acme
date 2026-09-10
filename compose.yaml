@@ -1,0 +1,39 @@
+# Local development infrastructure ONLY — no application code runs in Docker during dev.
+# Production runs on Dokploy (see docs/deployment.md and deploy/README.md).
+name: acme-dev
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-acme}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-acme}
+      POSTGRES_DB: ${POSTGRES_DB:-acme}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-acme} -d $${POSTGRES_DB:-acme}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1025}:1025" # SMTP (apps send test mail here)
+      - "${MAILPIT_UI_PORT:-8025}:8025" # Web UI at http://localhost:8025
+
+volumes:
+  pgdata:

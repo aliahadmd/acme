@@ -1,0 +1,35 @@
+{
+  "name": "@acme/web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "srvx --prod -s ../client dist/server/server.js",
+    "test": "vitest run",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@acme/api-client": "workspace:*",
+    "@tanstack/react-query": "^5.90.0",
+    "@tanstack/react-router": "^1.170.0",
+    "@tanstack/react-router-ssr-query": "^1.167.0",
+    "@tanstack/react-start": "^1.168.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "srvx": "^0.9.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@acme/config": "workspace:*",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "typescript": "^5.9.0",
+    "vite": "^8.0.0",
+    "vitest": "^3.0.0"
+  }
+}

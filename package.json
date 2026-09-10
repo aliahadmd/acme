@@ -1,0 +1,22 @@
+{
+  "name": "acme",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "test": "turbo test",
+    "lint": "biome check . && turbo lint",
+    "format": "biome check --write .",
+    "typecheck": "turbo typecheck",
+    "client": "turbo generate"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.0.0",
+    "turbo": "^2.0.0"
+  }
+}

@@ -1,0 +1,35 @@
+# --- Secrets / env ---
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# --- Node ---
+node_modules/
+dist/
+.turbo/
+*.tsbuildinfo
+
+# --- TanStack Start generated ---
+apps/web/src/routeTree.gen.ts
+
+# --- Python ---
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.ty/
+
+# --- Editors / OS ---
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# --- Misc ---
+*.log
+coverage/
