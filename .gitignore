@@ -12,9 +12,6 @@ dist/
 .turbo/
 *.tsbuildinfo
 
-# --- TanStack Start generated ---
-apps/web/src/routeTree.gen.ts
-
 # --- Python ---
 .venv/
 __pycache__/
