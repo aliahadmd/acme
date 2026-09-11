@@ -24,7 +24,7 @@ type-safe by a generated API client. Deploys to a Dokploy VPS via GitHub Actions
 | `packages/config`   | Shared tsconfig                                                        |
 | `docs/`             | architecture, environment matrix, deployment, ADRs                     |
 | `deploy/README.md`  | Step-by-step Dokploy production setup                                  |
-| `compose.yaml`      | LOCAL DEV infra only (postgres, redis, mailpit) — no app code          |
+| `compose.yaml`      | LOCAL DEV infra only (postgres+pgvector, seaweedfs S3, redis, mailpit) |
 
 ## Commands (`make help` lists all)
 

@@ -9,20 +9,45 @@ Do this once; after that, pushing to `main` deploys automatically.
 - A DNS zone you control: `api.<domain>` and `<domain>` A/AAAA records → VPS IP.
 - A GitHub repo for this project (CI workflows live in `.github/workflows/`).
 
-## 1. Databases (Dokploy → Databases → Create)
+## 1. Postgres + pgvector (Dokploy → Applications → Create)
 
-1. **Postgres** — create it, note the internal connection string, and convert it
-   to SQLAlchemy format:
-   `postgresql+psycopg://<user>:<password>@<host>:5432/<db>`
-   (host is the database's service name inside Dokploy's network).
-2. **Redis** (optional) — create it; note the internal URL.
+⚠️ Dokploy's stock **Database** resource is plain Postgres — **no pgvector**.
+Run the pgvector image as an Application instead:
 
-## 2. GHCR registry access (Dokploy → Docker Registries)
+- Source: Docker image `pgvector/pgvector:pg17` (pin the tag)
+- **Volumes**: add a volume → mount path `/var/lib/postgresql/data`
+- **Environment**: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
+  (generate strong values; note them for step 4)
+- No domain — internal network only. The internal connection string for the
+  api is:
+  `postgresql+psycopg://<user>:<password>@<service-name>:5432/<db>`
+  (`<service-name>` is the application's name inside Dokploy's network).
+
+### Optional: Redis
+
+Dokploy → Databases → Redis (stock resource is fine — no extensions needed).
+
+## 2. Object storage: SeaweedFS (Dokploy → Applications → Create)
+
+MinIO is archived/unmaintained — use SeaweedFS (Apache-2.0, active):
+
+- Source: Docker image `chrislusf/seaweedfs:4.46` (pin the tag)
+- **Command**:
+  `server -dir=/data -volume.max=0 -master.volumeSizeLimitMB=10240 -filer -s3 -s3.port=8333`
+- **Volumes**: volume → `/data` (this holds all objects — size it well)
+- **Domains**: `s3.<domain>` → port `8333`, HTTPS on
+- **Authentication**: mount an `s3.json` identities file (Dokploy → Advanced →
+  File mounts) and add `-s3.config=/etc/seaweedfs/s3.json` to the command —
+  see `docker/seaweedfs/s3.json` in the repo for the format. Generate a strong
+  access/secret key; note them for step 4.
+- Internal endpoint for the api: `http://<service-name>:8333`
+
+## 3. GHCR registry access (Dokploy → Docker Registries)
 
 CI pushes private images to `ghcr.io/<org>/<repo>`. Add a registry entry in
 Dokploy with a GitHub username + a PAT (classic) that has `read:packages`.
 
-## 3. Applications (Dokploy → Applications → Create)
+## 4. Applications (Dokploy → Applications → Create)
 
 Create two applications of type **Docker Image** (source: the GHCR images):
 
@@ -35,6 +60,10 @@ Create two applications of type **Docker Image** (source: the GHCR images):
   - `CORS_ORIGINS=https://<domain>`
   - `ENVIRONMENT=production`
   - `LOG_LEVEL=INFO`
+  - `S3_ENDPOINT=http://<seaweedfs-service>:8333`
+  - `S3_ACCESS_KEY` / `S3_SECRET_KEY` / `S3_BUCKET` (from step 2 — generate fresh strong keys)
+  - `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_FROM` /
+    `SMTP_USE_TLS=true` (from your mail relay — see docs/deployment.md § Email)
 - **Advanced → Pre-deploy command**: `/app/.venv/bin/alembic upgrade head`
 - Health check path: `/health`
 
@@ -50,9 +79,9 @@ Create two applications of type **Docker Image** (source: the GHCR images):
 > `.github/workflows/deploy.yml` as a build arg — change it there if the API
 > domain changes, then re-deploy.
 
-Note both **application IDs** (visible in the UI/API) for step 4.
+Note both **application IDs** (visible in the UI/API) for step 5.
 
-## 4. GitHub secrets & variables (repo → Settings → Secrets and variables → Actions)
+## 5. GitHub secrets & variables (repo → Settings → Secrets and variables → Actions)
 
 Secrets:
 
@@ -69,7 +98,7 @@ Variables (the public API URL inlined into the web bundle at build time):
 | ------------------ | --------------------------- |
 | `PUBLIC_API_URL`   | `https://api.<domain>`      |
 
-## 5. First deploy
+## 6. First deploy
 
 ```
 git remote add origin git@github.com:<org>/<repo>.git
@@ -80,7 +109,7 @@ git push -u origin main
 API for each application. Watch progress in GitHub Actions and Dokploy's
 deployment logs.
 
-## 6. Verify
+## 7. Verify
 
 - `curl https://api.<domain>/health` → `{"status":"ok","environment":"production"}`
 - Open `https://<domain>` → home page lists users (server-rendered).
@@ -92,4 +121,4 @@ If you'd rather have Dokploy build from the repo: create each application as
 **Dockerfile** source with **build context = repository root** and
 **Dockerfile path** `apps/api/Dockerfile` / `apps/web/Dockerfile`, connect the
 GitHub provider with watch paths (`apps/api/**` / `apps/web/**` +
-`packages/**`), and skip step 4. Trade-offs in `docs/decisions/0003-ghcr-dokploy.md`.
+`packages/**`), and skip step 5. Trade-offs in `docs/decisions/0003-ghcr-dokploy.md`.

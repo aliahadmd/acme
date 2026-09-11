@@ -3,8 +3,12 @@
 name: acme-dev
 
 services:
+  # Postgres 17 with the pgvector extension preinstalled (drop-in for postgres:17).
+  # AI features use vector similarity search against the same database.
+  # PROD NOTE: Dokploy's stock managed Postgres has no extensions — run this
+  # image as an Application with a volume instead (docs/deployment.md).
   postgres:
-    image: postgres:17-alpine
+    image: pgvector/pgvector:pg17
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-acme}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-acme}
@@ -29,6 +33,22 @@ services:
       timeout: 3s
       retries: 10
 
+  # S3-compatible object storage (single container: master + volume + filer + S3 gateway).
+  # S3 API on :8333, master UI on :9333. Dev credentials live in docker/seaweedfs/s3.json.
+  # MinIO is NOT used: its repo was archived 2026-04 and the community edition is unmaintained.
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.46
+    command: >
+      server -dir=/data -volume.max=0 -master.volumeSizeLimitMB=2048
+      -filer -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json
+    ports:
+      - "${S3_PORT:-8333}:8333"
+      - "${S3_UI_PORT:-9333}:9333"
+    volumes:
+      - seaweedfs_data:/data
+      - ./docker/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
+
+  # Catch-all SMTP for local dev: anything the app sends lands in its web UI at :8025.
   mailpit:
     image: axllent/mailpit:latest
     ports:
@@ -37,3 +57,4 @@ services:
 
 volumes:
   pgdata:
+  seaweedfs_data:

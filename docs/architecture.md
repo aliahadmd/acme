@@ -8,10 +8,12 @@
 │  │ TanStack     │───────▶│ FastAPI (uv)         │ │
 │  │ Start :3000  │  HTTP  │ :8000                │ │
 │  └──────────────┘        └──────────┬───────────┘ │
-│                          ┌──────────▼───────────┐ │
-│  compose.yaml (infra)    │ postgres · redis ·   │ │
-│  docker compose up -d ──▶│ mailpit              │ │
-│                          └──────────────────────┘ │
+│        │  SMTP (email)   ┌──────────▼───────────┐ │
+│  ┌─────▼─────┐          │ postgres (pgvector)  │ │
+│  │ mailpit   │          │ seaweedfs (S3 :8333) │ │
+│  │ :1025/:8025          │ redis                │ │
+│  └───────────┘          └──────────────────────┘ │
+│        all via compose.yaml (`make up`)           │
 └────────────────────────────────────────────────────┘
 
 ┌────────────── production (Dokploy VPS) ──────────────────────┐
@@ -28,6 +30,16 @@
 
 GitHub Actions (on main): build images ──▶ GHCR ──▶ trigger Dokploy deploy
 ```
+
+## Platform services (dev / prod)
+
+| Concern        | Dev (compose.yaml)              | Prod (Dokploy)                          | App access                          |
+| -------------- | ------------------------------- | --------------------------------------- | ----------------------------------- |
+| Database       | `pgvector/pgvector:pg17`        | pgvector image as Application + volume  | `DATABASE_URL`                      |
+| Vectors        | pgvector extension in the same DB | same                                  | `pgvector` python pkg, `CREATE EXTENSION vector` (migration 0002) |
+| Object storage | SeaweedFS (S3 API :8333)        | SeaweedFS Application + volume          | `S3_*` via `app/services/storage.py` (provider-neutral S3) |
+| Email          | Mailpit catch-all (:1025/:8025) | Your SMTP relay/MTA (see deployment.md) | `SMTP_*` via `app/services/email_service.py` |
+| Cache/queues   | Redis :6379                     | Dokploy Redis resource                  | `REDIS_URL` (reserved)              |
 
 ## Layers
 

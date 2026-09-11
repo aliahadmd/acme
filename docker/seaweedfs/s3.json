@@ -1,0 +1,11 @@
+{
+  "identities": [
+    {
+      "name": "acme-dev",
+      "credentials": [
+        { "accessKey": "acme", "secretKey": "acme-dev-secret" }
+      ],
+      "actions": ["Admin", "Read", "Write", "List"]
+    }
+  ]
+}

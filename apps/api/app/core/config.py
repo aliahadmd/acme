@@ -22,6 +22,20 @@ class Settings(BaseSettings):
     cors_origins: Annotated[list[str], NoDecode] = []
     redis_url: str | None = None  # reserved for future use (caching, queues)
 
+    # --- S3-compatible object storage (SeaweedFS in dev; Garage/R2/MinIO in prod) ---
+    s3_endpoint: str = "http://localhost:8333"
+    s3_access_key: str = "acme"
+    s3_secret_key: str = "acme-dev-secret"
+    s3_bucket: str = "acme-dev"
+
+    # --- Transactional email over plain SMTP (Mailpit in dev; your MTA/relay in prod) ---
+    smtp_host: str = "localhost"
+    smtp_port: int = 1025
+    smtp_user: str | None = None
+    smtp_password: str | None = None
+    smtp_from: str = "acme@localhost"
+    smtp_use_tls: bool = False
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def _split_origins(cls, value: object) -> object:
