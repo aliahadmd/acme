@@ -83,6 +83,9 @@ Note both **application IDs** (visible in the UI/API) for step 5.
 
 ## 5. GitHub secrets & variables (repo → Settings → Secrets and variables → Actions)
 
+The deploy-trigger job stays **skipped** until you create the repo variable
+`DOKPLOY_DEPLOY_ENABLED=true` — so `main` stays green before Dokploy is set up.
+
 Secrets:
 
 | Secret               | Value                                    |
@@ -92,11 +95,12 @@ Secrets:
 | `DOKPLOY_API_APP_ID` | api application id                       |
 | `DOKPLOY_WEB_APP_ID` | web application id                       |
 
-Variables (the public API URL inlined into the web bundle at build time):
+Variables:
 
-| Variable           | Value                       |
-| ------------------ | --------------------------- |
-| `PUBLIC_API_URL`   | `https://api.<domain>`      |
+| Variable                 | Value                       |
+| ------------------------ | --------------------------- |
+| `PUBLIC_API_URL`         | `https://api.<domain>`      |
+| `DOKPLOY_DEPLOY_ENABLED` | `true` (when step 4 is done)|
 
 ## 6. First deploy
 

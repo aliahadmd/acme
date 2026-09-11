@@ -36,7 +36,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec biome check .
-      - run: pnpm exec turbo run typecheck lint test build
+      # web-only: python (uv) checks run in the api job
+      - run: pnpm exec turbo run typecheck lint test build --filter=@acme/web
 
   client-drift:
     name: generated client is fresh
