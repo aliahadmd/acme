@@ -46,6 +46,7 @@ from pgvector.sqlalchemy import Vector
 from sqlalchemy import Column
 from sqlmodel import Field, SQLModel
 
+
 class Document(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     embedding: Any = Field(sa_column=Column(Vector(1536)))  # match your model's dim

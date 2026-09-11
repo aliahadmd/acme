@@ -1,5 +1,8 @@
 packages:
   - "apps/*"
   - "packages/*"
-allowBuilds:
-  esbuild: set this to true or false
+
+# Dependencies allowed to run install scripts (pnpm blocks them by default).
+# CI fails with ERR_PNPM_IGNORED_BUILDS without this.
+onlyBuiltDependencies:
+  - esbuild
