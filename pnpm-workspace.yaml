@@ -2,7 +2,7 @@ packages:
   - "apps/*"
   - "packages/*"
 
-# Dependencies allowed to run install scripts (pnpm blocks them by default).
-# CI fails with ERR_PNPM_IGNORED_BUILDS without this.
-onlyBuiltDependencies:
-  - esbuild
+# Dependencies allowed to run install scripts (pnpm 12 blocks them by default
+# and fails CI with ERR_PNPM_IGNORED_BUILDS unless allowed here).
+allowBuilds:
+  esbuild: true
