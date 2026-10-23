@@ -16,7 +16,7 @@
     "client": "turbo generate"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.0.0",
-    "turbo": "^2.0.0"
+    "@biomejs/biome": "^2.5.15",
+    "turbo": "^2.11.9"
   }
 }
